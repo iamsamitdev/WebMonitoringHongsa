@@ -1,0 +1,16 @@
+hongsa-power-rtms/backend/bin/
+hongsa-power-rtms/backend/obj/
+hongsa-power-rtms/backend/.vs/
+hongsa-power-rtms/backend/.env
+hongsa-power-rtms/frontend/.idea/
+hongsa-power-rtms/frontend/node_modules/
+hongsa-power-rtms/frontend/dist/
+hongsa-power-rtms/frontend/.env
+hongsa-power-rtms/frontend/.env.local
+hongsa-power-rtms/frontend/.env.development.local
+hongsa-power-rtms/frontend/.env.production.local
+hongsa-power-rtms/frontend/.cache/
+sampleapi/bin/
+sampleapi/obj/
+sampleapi/.vs/
+sampleapi/.env

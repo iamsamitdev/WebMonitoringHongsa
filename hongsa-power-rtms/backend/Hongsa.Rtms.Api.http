@@ -1,0 +1,6 @@
+@Hongsa.Rtms.Api_HostAddress = http://localhost:5115
+
+GET {{Hongsa.Rtms.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
