@@ -13,7 +13,7 @@ namespace Hongsa.Rtms.Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     [Migration("20251125063249_auth")]
-    partial class auth
+    partial class Auth
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
