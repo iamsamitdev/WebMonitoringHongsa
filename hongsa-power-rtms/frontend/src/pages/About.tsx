@@ -1,6 +1,12 @@
 import { CheckCircle2, Server, Database, Users } from 'lucide-react';
+import { useEffect } from 'react';
 
 const About = () => {
+
+  useEffect(() => {
+    document.title = "About | Hongsa Power RTMS";
+  }, [])
+
   return (
     <div className="min-h-screen bg-slate-50 pt-24 pb-20">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">

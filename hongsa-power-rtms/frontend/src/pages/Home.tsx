@@ -1,7 +1,13 @@
 import { Link } from 'react-router';
 import { ArrowRight, Activity, BarChart3, Bell } from 'lucide-react';
+import { useEffect } from 'react';
 
 const Home = () => {
+
+  useEffect(() => {
+    document.title = "Home | Hongsa Power RTMS";
+  }, [])
+
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
@@ -22,7 +28,7 @@ const Home = () => {
           
           <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-white mb-6">
             ยกระดับการจัดการพลังงาน <br className="hidden md:block" />
-            ด้วยระบบ <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">Smart Forecasting</span>
+            ด้วยระบบ <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-400 to-emerald-400">Smart Forecasting</span>
           </h1>
           
           <p className="mt-4 text-xl text-slate-400 max-w-2xl mx-auto mb-10">

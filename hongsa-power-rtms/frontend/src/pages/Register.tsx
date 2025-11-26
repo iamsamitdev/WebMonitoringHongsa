@@ -3,8 +3,14 @@ import { User, Mail, Lock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useEffect } from "react"
 
 function Register() {
+
+  useEffect(() => {
+    document.title = "Register | Hongsa Power RTMS";
+  }, [])
+
   return (
     <div className="flex flex-col space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex flex-col space-y-2 text-center">
@@ -44,7 +50,7 @@ function Register() {
           </div>
         </div>
         
-        <Button className="w-full bg-emerald-600 hover:bg-emerald-700">
+        <Button className="w-full bg-emerald-600 hover:bg-emerald-700 cursor-pointer">
           สมัครสมาชิก
         </Button>
       </div>

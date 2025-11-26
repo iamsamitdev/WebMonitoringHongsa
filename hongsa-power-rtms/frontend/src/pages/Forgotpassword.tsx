@@ -3,8 +3,14 @@ import { Mail, ChevronLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useEffect } from "react"
 
 function Forgotpassword() {
+
+  useEffect(() => {
+    document.title = "Forgot Password | Hongsa Power RTMS";
+  }, [])
+
   return (
     <div className="flex flex-col space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex flex-col space-y-2 text-center">
@@ -28,7 +34,7 @@ function Forgotpassword() {
           </div>
         </div>
         
-        <Button className="w-full">
+        <Button className="w-full cursor-pointer">
           ส่งลิงก์รีเซ็ตรหัสผ่าน
         </Button>
       </div>

@@ -1,5 +1,5 @@
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Link } from "react-router"
 import { Eye, EyeOff, User, Lock, ArrowRight } from "lucide-react"
 import { Input } from "@/components/ui/input"
@@ -7,6 +7,11 @@ import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 
 function Login() {
+
+  useEffect(() => {
+    document.title = "Login | Hongsa Power RTMS";
+  }, [])
+
   const [showPassword, setShowPassword] = useState(false)
   return (
     <div className="flex flex-col space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -50,7 +55,7 @@ function Login() {
             </button>
           </div>
         </div>
-        <Button className="w-full group">
+        <Button className="w-full group cursor-pointer">
           เข้าสู่ระบบ 
           <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
         </Button>
