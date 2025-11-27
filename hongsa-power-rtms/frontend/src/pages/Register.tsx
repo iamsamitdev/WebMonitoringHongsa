@@ -7,6 +7,11 @@ import { useEffect } from "react"
 import { useForm } from 'react-hook-form'
 import { authRegister, type RegisterData } from "@/services/apiAuth"
 
+// สร้าง Interface สำหรับ Form โดยเฉพาะ (รวม confirmPassword)
+interface RegisterFormInputs extends RegisterData {
+  confirmPassword?: string
+}
+
 function Register() {
 
   // ตั้ง title หน้า
@@ -15,16 +20,20 @@ function Register() {
   }, [])
 
   // การใช้ React Hook Form
-  const { register, handleSubmit, watch, formState: { errors } } = useForm<RegisterData>()
+  const { register, handleSubmit, watch, formState: { errors } } = useForm<RegisterFormInputs>()
 
   // ดูค่า password เพื่อใช้เทียบกับ confirm password
   const password = watch("password")
 
   // ฟังก์ชันเมื่อ Submit form
-  const onSubmit = async (data: RegisterData) => {
-    console.log(data);
+  const onSubmit = async (data: RegisterFormInputs) => {
+    // แยก confirmPassword ออกจากข้อมูลที่จะส่งไป API
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { confirmPassword, ...registerData } = data
+
+    console.log(registerData);
     try {
-      const response = await authRegister(data)
+      const response = await authRegister(registerData)
       console.log("Registration successful:", response)
       // สามารถเพิ่มการแจ้งเตือนหรือเปลี่ยนหน้าได้ที่นี่
     } catch (error) {
