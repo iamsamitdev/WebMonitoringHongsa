@@ -1160,3 +1160,16 @@ public class ForecastController : ControllerBase
     }
 }
 ```
+
+### กลับมาทำ Frontend ต่อ
+#### Step 9: ติดตั้ง react-hook-form
+```bash
+npm install react-hook-form
+```
+
+#### Step 10: เขียน logic หน้า Register ด้วย React Hook Form
+แก้ไขไฟล์ `Register.tsx` ในโฟลเดอร์ `src/pages` ดังนี้
+```tsx
+import React from 'react';
+import { useForm } from 'react-hook-form';
+```
