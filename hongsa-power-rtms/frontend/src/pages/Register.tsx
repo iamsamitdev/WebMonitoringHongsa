@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useEffect } from "react"
 import { useForm } from 'react-hook-form'
+import { authRegister, type RegisterData } from "@/services/apiAuth"
 
 function Register() {
 
@@ -14,14 +15,22 @@ function Register() {
   }, [])
 
   // การใช้ React Hook Form
-  const { register, handleSubmit, watch, formState: { errors } } = useForm()
+  const { register, handleSubmit, watch, formState: { errors } } = useForm<RegisterData>()
 
   // ดูค่า password เพื่อใช้เทียบกับ confirm password
   const password = watch("password")
 
   // ฟังก์ชันเมื่อ Submit form
-  const onSubmit = (data: unknown) => {
+  const onSubmit = async (data: RegisterData) => {
     console.log(data);
+    try {
+      const response = await authRegister(data)
+      console.log("Registration successful:", response)
+      // สามารถเพิ่มการแจ้งเตือนหรือเปลี่ยนหน้าได้ที่นี่
+    } catch (error) {
+      console.error("Registration failed:", error)
+      // สามารถเพิ่มการแจ้งเตือนข้อผิดพลาดได้ที่นี่
+    }
   }
 
   return (
@@ -77,12 +86,12 @@ function Register() {
               <div className="relative">
                 <Store className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                 <Input 
-                  id="department" 
-                  {...register("department", { required: "กรุณากรอกแผนกของคุณ" })} 
-                  className={`pl-10 ${errors.department ? "border-red-500 focus-visible:ring-red-500" : ""}`} 
+                  id="departmentName" 
+                  {...register("departmentName", { required: "กรุณากรอกแผนกของคุณ" })} 
+                  className={`pl-10 ${errors.departmentName ? "border-red-500 focus-visible:ring-red-500" : ""}`} 
                   placeholder="กรุณากรอกแผนกของคุณ" />
               </div>
-              {errors.department && <p className="text-red-500 text-xs">{errors.department.message as string}</p>}
+              {errors.departmentName && <p className="text-red-500 text-xs">{errors.departmentName.message as string}</p>}
             </div>
             <div className="space-y-2">
               <Label>ชื่อผู้ใช้งาน (Username)</Label>

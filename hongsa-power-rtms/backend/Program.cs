@@ -55,8 +55,19 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-// Show JWT:Secret
-// Console.WriteLine($"JWT:Secret: {builder.Configuration.GetSection("JWT:Secret").Value}");
+// Allow CORS
+builder.Services.AddCors(options => 
+{
+ options.AddPolicy("MultipleOrigins",
+    policy =>
+    {
+        policy.WithOrigins(
+            "*" // Allow any origin
+        )
+        .AllowAnyMethod()
+        .AllowAnyHeader();
+    });
+});
 
 // Add services to the container.
 
