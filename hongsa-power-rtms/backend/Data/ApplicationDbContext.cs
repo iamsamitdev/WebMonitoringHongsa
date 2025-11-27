@@ -70,6 +70,10 @@ public partial class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         modelBuilder.Entity<ForecastRequestItem>(entity =>
         {
             entity.ToTable("ForecastRequestItems");
+            entity.HasOne<ForecastRequest>()
+                .WithMany(r => r.Items)
+                .HasForeignKey(i => i.RequestID)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<ApprovedForecast>(entity =>
