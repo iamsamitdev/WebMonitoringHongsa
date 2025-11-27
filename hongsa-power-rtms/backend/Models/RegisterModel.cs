@@ -15,4 +15,17 @@ public class RegisterModel
     
     [Required(ErrorMessage = "Password is required")]
     public required string Password { get; set; }
+
+    // เพิ่มฟิลด์ใหม่ให้หน้ารับค่า
+    [Required(ErrorMessage = "First Name is required")]
+    public required string FirstName { get; set; }
+
+    [Required(ErrorMessage = "Last Name is required")]
+    public required string LastName { get; set; }
+
+    [Required(ErrorMessage = "Employee ID is required")]
+    public required string EmployeeId { get; set; }
+    
+    [Required(ErrorMessage = "Department Name is required")]
+    public required string DepartmentName { get; set; }
 }
