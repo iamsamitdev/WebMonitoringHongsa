@@ -1802,7 +1802,7 @@ function Login() {
 export default Login
 ```
 
-### แก้ไขเรื่อง CORS ใน Backend
+#### Step 17: แก้ไขเรื่อง CORS ใน Backend
 แก้ไขไฟล์ `Program.cs` ในโปรเจค ASP.NET Core ของคุณ ดังนี้
 ```csharp
 //
@@ -1823,6 +1823,60 @@ builder.Services.AddCors(options =>
 
 // Enable CORS
 app.UseCors("MultipleOrigins");
+```
+
+#### Step 18: เพิ่ม alert ด้วย Sonner
+```bash
+npx shadcn@latest add sonner
+```
+
+#### Step 19: เพิ่ม Sonner ที่ไฟล์ App.tsx
+แก้ไขไฟล์ `App.tsx` ในโฟลเดอร์ `src` ดังนี้
+```tsx
+import { AppRouter } from "./routes"
+import { Toaster } from "@/components/ui/sonner"
+
+function App() {
+  return (
+    <div className="App">
+      <AppRouter />
+      <Toaster />
+    </div>
+  )
+}
+
+export default App
+```
+
+#### Step 20: ใช้ Sonner ในหน้า Register และ Login
+แก้ไขไฟล์ `Register.tsx` เพื่อเพิ่มการแจ้งเตือนด้วย Sonner
+```tsx
+import { toast } from "sonner"
+
+// ในฟังก์ชัน onSubmit หลังจากลงทะเบียนสำเร็จ
+toast.success("ลงทะเบียนสำเร็จ", {
+    description: "บัญชีของคุณถูกสร้างเรียบร้อยแล้ว",
+})
+
+// ในฟังก์ชัน onSubmit เมื่อเกิดข้อผิดพลาด
+toast.error("ลงทะเบียนไม่สำเร็จ", {
+    description: errorMessage,
+})
+```
+
+แก้ไขไฟล์ `Login.tsx` เพื่อเพิ่มการแจ้งเตือนด้วย Sonner
+```tsx
+import { toast } from "sonner"
+
+// ในฟังก์ชัน onSubmit หลังจากเข้าสู่ระบบสำเร็จ
+toast.success("เข้าสู่ระบบสำเร็จ", {
+    description: "ยินดีต้อนรับกลับ",
+})
+
+// ในฟังก์ชัน onSubmit เมื่อเกิดข้อผิดพลาด
+toast.error("เข้าสู่ระบบไม่สำเร็จ", {
+    description: errorMessage,
+})
 ```
 
 ##### คำแนะนำข้อมูลที่ใช้ Register

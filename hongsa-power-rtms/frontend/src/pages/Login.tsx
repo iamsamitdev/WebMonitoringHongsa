@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { authLogin, type LoginData } from "@/services/apiAuth"
+import { toast } from "sonner"
 
 
 function Login() {
@@ -21,10 +22,16 @@ function Login() {
     try {
       const response = await authLogin(data)
       console.log("Login successful:", response)
-      // สามารถเพิ่มการแจ้งเตือนหรือเปลี่ยนหน้าได้ที่นี่
+      toast.success("เข้าสู่ระบบสำเร็จ", {
+        description: "ยินดีต้อนรับกลับ",
+      })
     } catch (error) {
       console.error("Login failed:", error)
-      // สามารถเพิ่มการแจ้งเตือนข้อผิดพลาดได้ที่นี่
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const errorMessage = (error as any).response?.data?.message || "เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง"
+      toast.error("เข้าสู่ระบบไม่สำเร็จ", {
+        description: errorMessage,
+      })
     }
   }
 
@@ -45,9 +52,14 @@ function Login() {
             <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
             <Input 
               id="username"
-              {...register("username", { required: "กรอกชื่อผู้ใช้งานหรืออีเมล" })}
+              {...register("username", { 
+                required: "กรอกชื่อผู้ใช้งาน (username)" ,
+                minLength: { 
+                  value: 3, message: "ความยาวอย่างน้อย 3 ตัวอักษร" 
+                }
+              })}
               className={`pl-10 ${errors.username ? "border-red-500 focus-visible:ring-red-500" : ""}`}
-              placeholder="username หรือ email@example.com" 
+              placeholder="username" 
             />
           </div>
           {errors.username && <p className="text-red-500 text-xs">{errors.username.message as string}</p>}
@@ -65,7 +77,10 @@ function Login() {
             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
             <Input 
               id="password"
-              {...register("password", { required: "กรอกรหัสผ่าน" })}
+              {...register("password", { 
+                required: "กรอกรหัสผ่าน",
+                minLength: { value: 8, message: "ความยาวอย่างน้อย 8 ตัวอักษร" } 
+              })}
               className={`pl-10 pr-10 ${errors.password ? "border-red-500 focus-visible:ring-red-500" : ""}`}
               type={showPassword ? "text" : "password"} 
               placeholder="••••••••" 

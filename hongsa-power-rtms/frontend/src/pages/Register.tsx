@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label"
 import { useEffect } from "react"
 import { useForm } from 'react-hook-form'
 import { authRegister, type RegisterData } from "@/services/apiAuth"
+import { toast } from "sonner"
 
 // สร้าง Interface สำหรับ Form โดยเฉพาะ (รวม confirmPassword)
 interface RegisterFormInputs extends RegisterData {
@@ -23,6 +24,7 @@ function Register() {
   const { register, handleSubmit, watch, formState: { errors } } = useForm<RegisterFormInputs>()
 
   // ดูค่า password เพื่อใช้เทียบกับ confirm password
+  // eslint-disable-next-line react-hooks/incompatible-library
   const password = watch("password")
 
   // ฟังก์ชันเมื่อ Submit form
@@ -35,10 +37,17 @@ function Register() {
     try {
       const response = await authRegister(registerData)
       console.log("Registration successful:", response)
-      // สามารถเพิ่มการแจ้งเตือนหรือเปลี่ยนหน้าได้ที่นี่
+      toast.success("ลงทะเบียนสำเร็จ", {
+        description: "บัญชีของคุณถูกสร้างเรียบร้อยแล้ว",
+      })
     } catch (error) {
       console.error("Registration failed:", error)
-      // สามารถเพิ่มการแจ้งเตือนข้อผิดพลาดได้ที่นี่
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const errorMessage = (error as any).response?.data?.message || "เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง"
+      
+      toast.error("ลงทะเบียนไม่สำเร็จ", {
+        description: errorMessage,
+      })
     }
   }
 
@@ -108,7 +117,10 @@ function Register() {
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                 <Input 
                   id="username" 
-                  {...register("username", { required: "ชื่อผู้ใช้งานของคุณ" })} 
+                  {...register("username", { 
+                    required: "ชื่อผู้ใช้งานของคุณ",
+                    minLength: { value: 3, message: "ความยาวอย่างน้อย 3 ตัวอักษร" }
+                  })} 
                   className={`pl-10 ${errors.username ? "border-red-500 focus-visible:ring-red-500" : ""}`} 
                   placeholder="ตั้งชื่อผู้ใช้งานของคุณ" />
               </div>
@@ -120,26 +132,35 @@ function Register() {
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                 <Input 
                   id="email" 
-                  {...register("email", { required: "กรอกอีเมลของคุณ" })} 
+                  {...register("email", { 
+                    required: "กรอกอีเมลของคุณ",
+                    pattern: {
+                      value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+                      message: "รูปแบบอีเมลไม่ถูกต้อง"
+                    }
+                  })} 
                   className={`pl-10 ${errors.email ? "border-red-500 focus-visible:ring-red-500" : ""}`} 
                   placeholder="name@company.com" />
               </div>
               {errors.email && <p className="text-red-500 text-xs">{errors.email.message as string}</p>}
             </div>
             <div className="space-y-2">
-              <Label>รหัสผ่าน</Label>
+              <Label>รหัสผ่าน (Password)</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                 <Input 
                   id="password" 
-                  {...register("password", { required: "กรอกรหัสผ่านของคุณ" })} 
+                  {...register("password", { 
+                    required: "กรอกรหัสผ่านของคุณ",
+                    minLength: { value: 8, message: "ความยาวอย่างน้อย 8 ตัวอักษร" }
+                  })} 
                   className={`pl-10 ${errors.password ? "border-red-500 focus-visible:ring-red-500" : ""}`} 
                   type="password" placeholder="••••••••" />
               </div>
               {errors.password && <p className="text-red-500 text-xs">{errors.password.message as string}</p>}
             </div>
             <div className="space-y-2">
-              <Label>ยืนยันรหัสผ่าน</Label>
+              <Label>ยืนยันรหัสผ่าน (Confirm)</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                 <Input 
