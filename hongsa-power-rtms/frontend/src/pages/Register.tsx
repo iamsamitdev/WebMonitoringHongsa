@@ -60,9 +60,9 @@ function Register() {
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                 <Input 
                   id="firstName" 
-                  {...register("firstName", { required: "กรุณากรอกชื่อของคุณ" })} 
+                  {...register("firstName", { required: "กรอกชื่อของคุณ" })} 
                   className={`pl-10 ${errors.firstName ? "border-red-500 focus-visible:ring-red-500" : ""}`} 
-                  placeholder="กรุณากรอกชื่อของคุณ" />
+                  placeholder="กรอกชื่อของคุณ" />
               </div>
               {errors.firstName && <p className="text-red-500 text-xs">{errors.firstName.message as string}</p>}
             </div>
@@ -72,9 +72,9 @@ function Register() {
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                 <Input 
                   id="lastName" 
-                  {...register("lastName", { required: "กรุณากรอกนามสกุลของคุณ" })} 
+                  {...register("lastName", { required: "กรอกนามสกุลของคุณ" })} 
                   className={`pl-10 ${errors.lastName ? "border-red-500 focus-visible:ring-red-500" : ""}`} 
-                  placeholder="กรุณากรอกนามสกุลของคุณ" />
+                  placeholder="กรอกนามสกุลของคุณ" />
               </div>
               <p className="text-red-500 text-xs">{errors.lastName?.message as string}</p>
             </div>
@@ -84,9 +84,9 @@ function Register() {
                 <IdCard className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                 <Input 
                   id="employeeId" 
-                  {...register("employeeId", { required: "กรุณากรอกรหัสพนักงานของคุณ" })} 
+                  {...register("employeeId", { required: "กรอกรหัสพนักงานของคุณ" })} 
                   className={`pl-10 ${errors.employeeId ? "border-red-500 focus-visible:ring-red-500" : ""}`} 
-                  placeholder="กรุณากรอกรหัสพนักงานของคุณ" />
+                  placeholder="กรอกรหัสพนักงานของคุณ" />
               </div>
               {errors.employeeId && <p className="text-red-500 text-xs">{errors.employeeId.message as string}</p>}
             </div>
@@ -96,9 +96,9 @@ function Register() {
                 <Store className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                 <Input 
                   id="departmentName" 
-                  {...register("departmentName", { required: "กรุณากรอกแผนกของคุณ" })} 
+                  {...register("departmentName", { required: "แผนกของคุณ" })} 
                   className={`pl-10 ${errors.departmentName ? "border-red-500 focus-visible:ring-red-500" : ""}`} 
-                  placeholder="กรุณากรอกแผนกของคุณ" />
+                  placeholder="แผนกของคุณ" />
               </div>
               {errors.departmentName && <p className="text-red-500 text-xs">{errors.departmentName.message as string}</p>}
             </div>
@@ -108,7 +108,7 @@ function Register() {
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                 <Input 
                   id="username" 
-                  {...register("username", { required: "กรุณากรอกชื่อผู้ใช้งานของคุณ" })} 
+                  {...register("username", { required: "ชื่อผู้ใช้งานของคุณ" })} 
                   className={`pl-10 ${errors.username ? "border-red-500 focus-visible:ring-red-500" : ""}`} 
                   placeholder="ตั้งชื่อผู้ใช้งานของคุณ" />
               </div>
@@ -120,10 +120,11 @@ function Register() {
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                 <Input 
                   id="email" 
-                  {...register("email", { required: "กรุณากรอกอีเมลของคุณ" })} 
+                  {...register("email", { required: "กรอกอีเมลของคุณ" })} 
                   className={`pl-10 ${errors.email ? "border-red-500 focus-visible:ring-red-500" : ""}`} 
-                  type="email" placeholder="name@company.com" />
+                  placeholder="name@company.com" />
               </div>
+              {errors.email && <p className="text-red-500 text-xs">{errors.email.message as string}</p>}
             </div>
             <div className="space-y-2">
               <Label>รหัสผ่าน</Label>
@@ -131,7 +132,7 @@ function Register() {
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                 <Input 
                   id="password" 
-                  {...register("password", { required: "กรุณากรอกรหัสผ่านของคุณ" })} 
+                  {...register("password", { required: "กรอกรหัสผ่านของคุณ" })} 
                   className={`pl-10 ${errors.password ? "border-red-500 focus-visible:ring-red-500" : ""}`} 
                   type="password" placeholder="••••••••" />
               </div>
@@ -145,7 +146,7 @@ function Register() {
                   id="confirmPassword" 
                   {
                       ...register("confirmPassword", { 
-                      required: "กรุณากรอกยืนยันรหัสผ่านของคุณ",
+                      required: "กรอกยืนยันรหัสผ่านของคุณ",
                       validate: value => value === password || "รหัสผ่านไม่ตรงกัน"
                     })
                   } 

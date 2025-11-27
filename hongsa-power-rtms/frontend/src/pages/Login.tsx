@@ -5,20 +5,27 @@ import { Eye, EyeOff, User, Lock, ArrowRight } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
+import { authLogin, type LoginData } from "@/services/apiAuth"
+
 
 function Login() {
-
-  // ทดสอบอ่านไฟล์ .env
-  console.log(import.meta.env.VITE_API_URL);
 
   useEffect(() => {
     document.title = "Login | Hongsa Power RTMS";
   }, [])
 
-  const { register, handleSubmit, formState: { errors } } = useForm()
+  const { register, handleSubmit, formState: { errors } } = useForm<LoginData>()
 
-  const onSubmit = (data: unknown) => {
+  const onSubmit = async (data: LoginData) => {
     console.log(data)
+    try {
+      const response = await authLogin(data)
+      console.log("Login successful:", response)
+      // สามารถเพิ่มการแจ้งเตือนหรือเปลี่ยนหน้าได้ที่นี่
+    } catch (error) {
+      console.error("Login failed:", error)
+      // สามารถเพิ่มการแจ้งเตือนข้อผิดพลาดได้ที่นี่
+    }
   }
 
   const [showPassword, setShowPassword] = useState(false)
@@ -33,12 +40,12 @@ function Login() {
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="space-y-2">
-          <Label>ชื่อผู้ใช้งาน / อีเมล</Label>
+          <Label>ชื่อผู้ใช้งาน (Username)</Label>
           <div className="relative">
             <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
             <Input 
               id="username"
-              {...register("username", { required: "กรุณากรอกชื่อผู้ใช้งานหรืออีเมล" })}
+              {...register("username", { required: "กรอกชื่อผู้ใช้งานหรืออีเมล" })}
               className={`pl-10 ${errors.username ? "border-red-500 focus-visible:ring-red-500" : ""}`}
               placeholder="username หรือ email@example.com" 
             />
@@ -47,7 +54,7 @@ function Login() {
         </div>
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <Label>รหัสผ่าน</Label>
+            <Label>รหัสผ่าน (Password)</Label>
             <Button variant="link" className="text-xs" asChild>
               <Link to="/auth/forgot-password">
                 ลืมรหัสผ่าน?
@@ -58,7 +65,7 @@ function Login() {
             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
             <Input 
               id="password"
-              {...register("password", { required: "กรุณากรอกรหัสผ่าน" })}
+              {...register("password", { required: "กรอกรหัสผ่าน" })}
               className={`pl-10 pr-10 ${errors.password ? "border-red-500 focus-visible:ring-red-500" : ""}`}
               type={showPassword ? "text" : "password"} 
               placeholder="••••••••" 

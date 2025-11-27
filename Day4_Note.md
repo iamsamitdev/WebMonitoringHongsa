@@ -7,7 +7,7 @@
 ### Database Design for RTMS <a name="database-design"></a>
 Real Time Machine Status & Forecasting Database Design
 
-<img src="https://d2ydwhgvd3hasw.cloudfront.net/1k79k%2Fpreview%2F73168544%2Fmain_full.jpg?response-content-disposition=inline%3Bfilename%3D%22main_full.jpg%22%3B&response-content-type=image%2Fjpeg&Expires=1764200748&Signature=MnPD8bNLMU4nx4xH77YF0MjOi8I6Y7hLrpwA6ML9zSc2xH57b6~WKkpuBSneA48lTwTLVZiqKPe2jkgfDhYVpebxR8OOeeNoCcqVwjn2gTHfdhe93nuIU-hH2E9umNeW2~ARAUwD8K1Wr8wCJe6~lxxp2h7vIXOF0XaJxGptmGNvJt3RNhUakeRZKjkMx6EZXOc5qFnegA96Ycfc-EvwC6FomsVIUaAL-8Tui0s2bB07ExOU3nWU47hNkA4DJBv86ffOH5tOxenyflK7GubE0652eRwBNAcMU30mUMgc~d571uOaxHZYdprQrIfoEuwWW8lyy3ZwnqybUJoL9Oh66Q__&Key-Pair-Id=APKAJT5WQLLEOADKLHBQ" />
+<img src="https://img5.pic.in.th/file/secure-sv1/itgs-00000.jpg" />
 
 Based on the SQL script, here are the required tables:
 
@@ -779,11 +779,12 @@ public class PreviewResultDto
 ```csharp
 namespace Hongsa.Rtms.Api.DTOs;
 
-// DTO สำหรับการอนุมัติพยากรณ์โดย Admin
-public class ApprovePlanDto
+// DTO สำหรับแต่ละรายการที่ Admin อนุมัติ
+public class ApprovedItemDto
 {
-    public int RequestID { get; set; }
-    public List<ApprovedItemDto> Items { get; set; } = new();
+    public string StartTime { get; set; } = string.Empty;
+    public string EndTime { get; set; } = string.Empty;
+    public decimal FinalLoadMW { get; set; }
 }
 ```
 
@@ -1170,6 +1171,666 @@ npm install react-hook-form
 #### Step 10: เขียน logic หน้า Register ด้วย React Hook Form
 แก้ไขไฟล์ `Register.tsx` ในโฟลเดอร์ `src/pages` ดังนี้
 ```tsx
-import React from 'react';
-import { useForm } from 'react-hook-form';
+import { Link } from "react-router"
+import { User, Mail, Lock, IdCard, Store } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { useEffect } from "react"
+import { useForm } from 'react-hook-form'
+
+function Register() {
+
+  // ตั้ง title หน้า
+  useEffect(() => {
+    document.title = "Register | Hongsa Power RTMS"
+  }, [])
+
+  // การใช้ React Hook Form
+  const { register, handleSubmit, watch, formState: { errors } } = useForm()
+
+  // ดูค่า password เพื่อใช้เทียบกับ confirm password
+  // eslint-disable-next-line react-hooks/incompatible-library
+  const password = watch("password")
+
+  // ฟังก์ชันเมื่อ Submit form
+  const onSubmit = async (data: unknown) => {
+    console.log(data);
+  }
+
+  return (
+    <div className="flex flex-col space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="flex flex-col space-y-2 text-center">
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900">สร้างบัญชีใหม่</h1>
+        <p className="text-sm text-slate-500">
+          สมัครสมาชิกเพื่อเริ่มใช้งานระบบ Forecasting
+        </p>
+      </div>
+
+      <div className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>ชื่อ (First Name)</Label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                <Input 
+                  id="firstName" 
+                  {...register("firstName", { required: "กรอกชื่อของคุณ" })} 
+                  className={`pl-10 ${errors.firstName ? "border-red-500 focus-visible:ring-red-500" : ""}`} 
+                  placeholder="กรอกชื่อของคุณ" />
+              </div>
+              {errors.firstName && <p className="text-red-500 text-xs">{errors.firstName.message as string}</p>}
+            </div>
+            <div className="space-y-2">
+              <Label>นามสกุล (Last Name)</Label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                <Input 
+                  id="lastName" 
+                  {...register("lastName", { required: "กรอกนามสกุลของคุณ" })} 
+                  className={`pl-10 ${errors.lastName ? "border-red-500 focus-visible:ring-red-500" : ""}`} 
+                  placeholder="กรอกนามสกุลของคุณ" />
+              </div>
+              <p className="text-red-500 text-xs">{errors.lastName?.message as string}</p>
+            </div>
+            <div className="space-y-2">
+              <Label>รหัสพนักงาน (Employee ID)</Label>
+              <div className="relative">
+                <IdCard className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                <Input 
+                  id="employeeId" 
+                  {...register("employeeId", { required: "กรอกรหัสพนักงานของคุณ" })} 
+                  className={`pl-10 ${errors.employeeId ? "border-red-500 focus-visible:ring-red-500" : ""}`} 
+                  placeholder="กรอกรหัสพนักงานของคุณ" />
+              </div>
+              {errors.employeeId && <p className="text-red-500 text-xs">{errors.employeeId.message as string}</p>}
+            </div>
+            <div className="space-y-2">
+              <Label>แผนก (Department Name)</Label>
+              <div className="relative">
+                <Store className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                <Input 
+                  id="departmentName" 
+                  {...register("departmentName", { required: "แผนกของคุณ" })} 
+                  className={`pl-10 ${errors.departmentName ? "border-red-500 focus-visible:ring-red-500" : ""}`} 
+                  placeholder="แผนกของคุณ" />
+              </div>
+              {errors.departmentName && <p className="text-red-500 text-xs">{errors.departmentName.message as string}</p>}
+            </div>
+            <div className="space-y-2">
+              <Label>ชื่อผู้ใช้งาน (Username)</Label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                <Input 
+                  id="username" 
+                  {...register("username", { required: "ชื่อผู้ใช้งานของคุณ" })} 
+                  className={`pl-10 ${errors.username ? "border-red-500 focus-visible:ring-red-500" : ""}`} 
+                  placeholder="ตั้งชื่อผู้ใช้งานของคุณ" />
+              </div>
+              {errors.username && <p className="text-red-500 text-xs">{errors.username.message as string}</p>}
+            </div>
+            <div className="space-y-2">
+              <Label>อีเมล (Email)</Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                <Input 
+                  id="email" 
+                  {...register("email", { required: "กรอกอีเมลของคุณ" })} 
+                  className={`pl-10 ${errors.email ? "border-red-500 focus-visible:ring-red-500" : ""}`} 
+                  placeholder="name@company.com" />
+              </div>
+              {errors.email && <p className="text-red-500 text-xs">{errors.email.message as string}</p>}
+            </div>
+            <div className="space-y-2">
+              <Label>รหัสผ่าน</Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                <Input 
+                  id="password" 
+                  {...register("password", { required: "กรอกรหัสผ่านของคุณ" })} 
+                  className={`pl-10 ${errors.password ? "border-red-500 focus-visible:ring-red-500" : ""}`} 
+                  type="password" placeholder="••••••••" />
+              </div>
+              {errors.password && <p className="text-red-500 text-xs">{errors.password.message as string}</p>}
+            </div>
+            <div className="space-y-2">
+              <Label>ยืนยันรหัสผ่าน</Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                <Input 
+                  id="confirmPassword" 
+                  {
+                      ...register("confirmPassword", { 
+                      required: "กรอกยืนยันรหัสผ่านของคุณ",
+                      validate: value => value === password || "รหัสผ่านไม่ตรงกัน"
+                    })
+                  } 
+                  className={`pl-10 ${errors.confirmPassword ? "border-red-500 focus-visible:ring-red-500" : ""}`} 
+                  type="password" placeholder="••••••••" />
+              </div>
+              {errors.confirmPassword && <p className="text-red-500 text-xs">{errors.confirmPassword.message as string}</p>}
+            </div>
+          </div>
+        
+        <Button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700 cursor-pointer">
+          สมัครสมาชิก
+        </Button>
+        </form>
+      </div>
+
+      <div className="text-center text-sm">
+        มีบัญชีอยู่แล้ว?{" "}
+        <Button variant="link" asChild>
+          <Link to="/auth/login">
+            เข้าสู่ระบบ
+          </Link>
+        </Button>
+      </div>
+    </div>
+  )
+}
+
+export default Register
 ```
+
+#### Step 11: แก้ไขไฟล์ `Login.tsx` 
+แก้ไขไฟล์ `Login.tsx` ในโฟลเดอร์ `src/pages` ดังนี้
+```tsx
+import { useEffect, useState } from "react"
+import { Link } from "react-router"
+import { useForm } from "react-hook-form"
+import { Eye, EyeOff, User, Lock, ArrowRight } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button"
+
+function Login() {
+
+  useEffect(() => {
+    document.title = "Login | Hongsa Power RTMS";
+  }, [])
+
+  const { register, handleSubmit, formState: { errors } } = useForm()
+
+  const onSubmit = (data: unknown) => {
+    console.log(data)
+  }
+
+  const [showPassword, setShowPassword] = useState(false)
+  return (
+    <div className="flex flex-col space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="flex flex-col space-y-2 text-center">
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900">ยินดีต้อนรับกลับ</h1>
+        <p className="text-sm text-slate-500">
+          เข้าสู่ระบบเพื่อจัดการข้อมูลสถานะเครื่องจักร
+        </p>
+      </div>
+
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <div className="space-y-2">
+          <Label>ชื่อผู้ใช้งาน / อีเมล</Label>
+          <div className="relative">
+            <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+            <Input 
+              id="username"
+              {...register("username", { required: "กรอกชื่อผู้ใช้งานหรืออีเมล" })}
+              className={`pl-10 ${errors.username ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+              placeholder="username หรือ email@example.com" 
+            />
+          </div>
+          {errors.username && <p className="text-red-500 text-xs">{errors.username.message as string}</p>}
+        </div>
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <Label>รหัสผ่าน</Label>
+            <Button variant="link" className="text-xs" asChild>
+              <Link to="/auth/forgot-password">
+                ลืมรหัสผ่าน?
+              </Link>
+            </Button>
+          </div>
+          <div className="relative">
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+            <Input 
+              id="password"
+              {...register("password", { required: "กรอกรหัสผ่าน" })}
+              className={`pl-10 pr-10 ${errors.password ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+              type={showPassword ? "text" : "password"} 
+              placeholder="••••••••" 
+            />
+            <button 
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+            >
+              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
+          </div>
+          {errors.password && <p className="text-red-500 text-xs">{errors.password.message as string}</p>}
+        </div>
+        <Button type="submit" className="w-full group cursor-pointer">
+          เข้าสู่ระบบ 
+          <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+        </Button>
+      </form>
+
+      <div className="relative">
+        <div className="absolute inset-0 flex items-center">
+          <span className="w-full border-t border-slate-200" />
+        </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-white px-2 text-slate-500">หรือ</span>
+        </div>
+      </div>
+
+      <div className="text-center text-sm">
+        ยังไม่มีบัญชีใช่ไหม?{" "}
+        <Button variant="link" asChild>
+          <Link to="/auth/register">
+            ลงทะเบียนผู้ใช้งานใหม่
+          </Link>
+        </Button>
+      </div>
+    </div>
+  )
+}
+
+export default Login
+```
+
+#### Step 12: ติดตั้ง axios
+```bash
+npm install axios
+```
+
+#### Step 13: สร้างไฟล์ตั้งค่า .env, .env.local
+สร้างไฟล์ `.env` และ `.env.local` ในโฟลเดอร์ root ของโปรเจค React ของคุณ
+```env
+VITE_API_URL=http://abc.com/api
+```
+
+```env
+VITE_API_URL=http://localhost:5000/api
+```
+
+#### Step 14: สร้าง Service สำหรับติดต่อ API
+สร้างโฟลเดอร์ใหม่ชื่อ `services` ในโฟลเดอร์ `src` และสร้างไฟล์ใหม่ชื่อ `apiAuth.ts` เพื่อจัดการการติดต่อกับ API
+```ts
+import axios from "axios"
+
+// กำหนดตัวแปรสำหรับ URL ของ API จากไฟล์ .env
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api"
+
+// Interface สำหรับข้อมูลการเข้าสู่ระบบ
+interface LoginData {
+  username: string
+  password: string
+}
+
+// Interface สำหรับข้อมูลการลงทะเบียน
+interface RegisterData {
+  firstName: string
+  lastName: string
+  employeeId: string
+  departmentName: string
+  username: string
+  email: string
+  password: string
+}
+
+// สร้าง Config สำหรับ Axios
+const api = axios.create({
+  baseURL: BASE_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
+  timeout: 10000, // 10 วินาที
+})
+
+// ฟังก์ชันสำหรับการเข้าสู่ระบบ
+const authLogin = async (data: LoginData) => {
+  const response = await api.post("/Authenticate/login", data)
+  return response.data
+}
+
+// ฟังก์ชันสำหรับการลงทะเบียน
+const authRegister = async (data: RegisterData) => {
+  const response = await api.post("/Authenticate/register-user", data)
+  return response.data
+}
+
+export { authLogin, authRegister }
+export type { LoginData, RegisterData }
+```
+
+#### Step 15: เชื่อมต่อหน้า Register กับ API
+แก้ไขไฟล์ `Register.tsx` ในโฟลเดอร์ `src/pages` ดังนี้
+```tsx
+import { Link } from "react-router"
+import { User, Mail, Lock, IdCard, Store } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { useEffect } from "react"
+import { useForm } from 'react-hook-form'
+import { authRegister, type RegisterData } from "@/services/apiAuth"
+
+// สร้าง Interface สำหรับ Form โดยเฉพาะ (รวม confirmPassword)
+interface RegisterFormInputs extends RegisterData {
+  confirmPassword?: string
+}
+
+function Register() {
+
+  // ตั้ง title หน้า
+  useEffect(() => {
+    document.title = "Register | Hongsa Power RTMS"
+  }, [])
+
+  // การใช้ React Hook Form
+  const { register, handleSubmit, watch, formState: { errors } } = useForm<RegisterFormInputs>()
+
+  // ดูค่า password เพื่อใช้เทียบกับ confirm password
+  const password = watch("password")
+
+  // ฟังก์ชันเมื่อ Submit form
+  const onSubmit = async (data: RegisterFormInputs) => {
+    // แยก confirmPassword ออกจากข้อมูลที่จะส่งไป API
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { confirmPassword, ...registerData } = data
+
+    console.log(registerData);
+    try {
+      const response = await authRegister(registerData)
+      console.log("Registration successful:", response)
+      // สามารถเพิ่มการแจ้งเตือนหรือเปลี่ยนหน้าได้ที่นี่
+    } catch (error) {
+      console.error("Registration failed:", error)
+      // สามารถเพิ่มการแจ้งเตือนข้อผิดพลาดได้ที่นี่
+    }
+  }
+
+  return (
+    <div className="flex flex-col space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="flex flex-col space-y-2 text-center">
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900">สร้างบัญชีใหม่</h1>
+        <p className="text-sm text-slate-500">
+          สมัครสมาชิกเพื่อเริ่มใช้งานระบบ Forecasting
+        </p>
+      </div>
+
+      <div className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>ชื่อ (First Name)</Label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                <Input 
+                  id="firstName" 
+                  {...register("firstName", { required: "กรอกชื่อของคุณ" })} 
+                  className={`pl-10 ${errors.firstName ? "border-red-500 focus-visible:ring-red-500" : ""}`} 
+                  placeholder="กรอกชื่อของคุณ" />
+              </div>
+              {errors.firstName && <p className="text-red-500 text-xs">{errors.firstName.message as string}</p>}
+            </div>
+            <div className="space-y-2">
+              <Label>นามสกุล (Last Name)</Label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                <Input 
+                  id="lastName" 
+                  {...register("lastName", { required: "กรอกนามสกุลของคุณ" })} 
+                  className={`pl-10 ${errors.lastName ? "border-red-500 focus-visible:ring-red-500" : ""}`} 
+                  placeholder="กรอกนามสกุลของคุณ" />
+              </div>
+              <p className="text-red-500 text-xs">{errors.lastName?.message as string}</p>
+            </div>
+            <div className="space-y-2">
+              <Label>รหัสพนักงาน (Employee ID)</Label>
+              <div className="relative">
+                <IdCard className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                <Input 
+                  id="employeeId" 
+                  {...register("employeeId", { required: "กรอกรหัสพนักงานของคุณ" })} 
+                  className={`pl-10 ${errors.employeeId ? "border-red-500 focus-visible:ring-red-500" : ""}`} 
+                  placeholder="กรอกรหัสพนักงานของคุณ" />
+              </div>
+              {errors.employeeId && <p className="text-red-500 text-xs">{errors.employeeId.message as string}</p>}
+            </div>
+            <div className="space-y-2">
+              <Label>แผนก (Department Name)</Label>
+              <div className="relative">
+                <Store className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                <Input 
+                  id="departmentName" 
+                  {...register("departmentName", { required: "แผนกของคุณ" })} 
+                  className={`pl-10 ${errors.departmentName ? "border-red-500 focus-visible:ring-red-500" : ""}`} 
+                  placeholder="แผนกของคุณ" />
+              </div>
+              {errors.departmentName && <p className="text-red-500 text-xs">{errors.departmentName.message as string}</p>}
+            </div>
+            <div className="space-y-2">
+              <Label>ชื่อผู้ใช้งาน (Username)</Label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                <Input 
+                  id="username" 
+                  {...register("username", { required: "ชื่อผู้ใช้งานของคุณ" })} 
+                  className={`pl-10 ${errors.username ? "border-red-500 focus-visible:ring-red-500" : ""}`} 
+                  placeholder="ตั้งชื่อผู้ใช้งานของคุณ" />
+              </div>
+              {errors.username && <p className="text-red-500 text-xs">{errors.username.message as string}</p>}
+            </div>
+            <div className="space-y-2">
+              <Label>อีเมล (Email)</Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                <Input 
+                  id="email" 
+                  {...register("email", { required: "กรอกอีเมลของคุณ" })} 
+                  className={`pl-10 ${errors.email ? "border-red-500 focus-visible:ring-red-500" : ""}`} 
+                  placeholder="name@company.com" />
+              </div>
+              {errors.email && <p className="text-red-500 text-xs">{errors.email.message as string}</p>}
+            </div>
+            <div className="space-y-2">
+              <Label>รหัสผ่าน</Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                <Input 
+                  id="password" 
+                  {...register("password", { required: "กรอกรหัสผ่านของคุณ" })} 
+                  className={`pl-10 ${errors.password ? "border-red-500 focus-visible:ring-red-500" : ""}`} 
+                  type="password" placeholder="••••••••" />
+              </div>
+              {errors.password && <p className="text-red-500 text-xs">{errors.password.message as string}</p>}
+            </div>
+            <div className="space-y-2">
+              <Label>ยืนยันรหัสผ่าน</Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                <Input 
+                  id="confirmPassword" 
+                  {
+                      ...register("confirmPassword", { 
+                      required: "กรอกยืนยันรหัสผ่านของคุณ",
+                      validate: value => value === password || "รหัสผ่านไม่ตรงกัน"
+                    })
+                  } 
+                  className={`pl-10 ${errors.confirmPassword ? "border-red-500 focus-visible:ring-red-500" : ""}`} 
+                  type="password" placeholder="••••••••" />
+              </div>
+              {errors.confirmPassword && <p className="text-red-500 text-xs">{errors.confirmPassword.message as string}</p>}
+            </div>
+          </div>
+        
+        <Button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700 cursor-pointer">
+          สมัครสมาชิก
+        </Button>
+        </form>
+      </div>
+
+      <div className="text-center text-sm">
+        มีบัญชีอยู่แล้ว?{" "}
+        <Button variant="link" asChild>
+          <Link to="/auth/login">
+            เข้าสู่ระบบ
+          </Link>
+        </Button>
+      </div>
+    </div>
+  )
+}
+
+export default Register
+```
+
+#### Step 16: เชื่อมต่อหน้า Login กับ API
+แก้ไขไฟล์ `Login.tsx` ในโฟลเดอร์ `src/pages
+```tsx
+import { useEffect, useState } from "react"
+import { Link } from "react-router"
+import { useForm } from "react-hook-form"
+import { Eye, EyeOff, User, Lock, ArrowRight } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button"
+import { authLogin, type LoginData } from "@/services/apiAuth"
+
+
+function Login() {
+
+  useEffect(() => {
+    document.title = "Login | Hongsa Power RTMS";
+  }, [])
+
+  const { register, handleSubmit, formState: { errors } } = useForm<LoginData>()
+
+  const onSubmit = async (data: LoginData) => {
+    console.log(data)
+    try {
+      const response = await authLogin(data)
+      console.log("Login successful:", response)
+      // สามารถเพิ่มการแจ้งเตือนหรือเปลี่ยนหน้าได้ที่นี่
+    } catch (error) {
+      console.error("Login failed:", error)
+      // สามารถเพิ่มการแจ้งเตือนข้อผิดพลาดได้ที่นี่
+    }
+  }
+
+  const [showPassword, setShowPassword] = useState(false)
+  return (
+    <div className="flex flex-col space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="flex flex-col space-y-2 text-center">
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900">ยินดีต้อนรับกลับ</h1>
+        <p className="text-sm text-slate-500">
+          เข้าสู่ระบบเพื่อจัดการข้อมูลสถานะเครื่องจักร
+        </p>
+      </div>
+
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <div className="space-y-2">
+          <Label>ชื่อผู้ใช้งาน (Username)</Label>
+          <div className="relative">
+            <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+            <Input 
+              id="username"
+              {...register("username", { required: "กรอกชื่อผู้ใช้งานหรืออีเมล" })}
+              className={`pl-10 ${errors.username ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+              placeholder="username หรือ email@example.com" 
+            />
+          </div>
+          {errors.username && <p className="text-red-500 text-xs">{errors.username.message as string}</p>}
+        </div>
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <Label>รหัสผ่าน (Password)</Label>
+            <Button variant="link" className="text-xs" asChild>
+              <Link to="/auth/forgot-password">
+                ลืมรหัสผ่าน?
+              </Link>
+            </Button>
+          </div>
+          <div className="relative">
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+            <Input 
+              id="password"
+              {...register("password", { required: "กรอกรหัสผ่าน" })}
+              className={`pl-10 pr-10 ${errors.password ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+              type={showPassword ? "text" : "password"} 
+              placeholder="••••••••" 
+            />
+            <button 
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+            >
+              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
+          </div>
+          {errors.password && <p className="text-red-500 text-xs">{errors.password.message as string}</p>}
+        </div>
+        <Button type="submit" className="w-full group cursor-pointer">
+          เข้าสู่ระบบ 
+          <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+        </Button>
+      </form>
+
+      <div className="relative">
+        <div className="absolute inset-0 flex items-center">
+          <span className="w-full border-t border-slate-200" />
+        </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-white px-2 text-slate-500">หรือ</span>
+        </div>
+      </div>
+
+      <div className="text-center text-sm">
+        ยังไม่มีบัญชีใช่ไหม?{" "}
+        <Button variant="link" asChild>
+          <Link to="/auth/register">
+            ลงทะเบียนผู้ใช้งานใหม่
+          </Link>
+        </Button>
+      </div>
+    </div>
+  )
+}
+
+export default Login
+```
+
+### แก้ไขเรื่อง CORS ใน Backend
+แก้ไขไฟล์ `Program.cs` ในโปรเจค ASP.NET Core ของคุณ ดังนี้
+```csharp
+//
+// Allow CORS
+builder.Services.AddCors(options => 
+{
+ options.AddPolicy("MultipleOrigins",
+    policy =>
+    {
+        policy.WithOrigins(
+            "*" // Allow any origin
+        )
+        .AllowAnyMethod()
+        .AllowAnyHeader();
+    });
+});
+//
+
+// Enable CORS
+app.UseCors("MultipleOrigins");
+```
+
+##### คำแนะนำข้อมูลที่ใช้ Register
+- ชื่อ (First Name): test
+- นามสกุล (Last Name): user
+- รหัสพนักงาน (Employee ID): EMP001
+- แผนก (Department Name): IT
+- ชื่อผู้ใช้งาน (Username): testuser
+- อีเมล (Email): test.user@example.com
+- รหัสผ่าน (Password): P@ssw0rd
+- ยืนยันรหัสผ่าน (Confirm Password): P@ssw0rd
