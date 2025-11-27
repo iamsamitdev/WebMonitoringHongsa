@@ -1,5 +1,5 @@
-import { Outlet } from "react-router"
-import { Zap, Activity, Server, CheckCircle2 } from "lucide-react"
+import { Outlet, Link } from "react-router"
+import { Zap, Activity, Server, CheckCircle2, ArrowLeft } from "lucide-react"
 
 function AuthLayout() {
   return (
@@ -100,6 +100,14 @@ function AuthLayout() {
 
       {/* Right Column: Forms */}
       <div className="flex items-center justify-center p-8 bg-white relative">
+        
+        {/* Back to Home Button */}
+        <Link to="/" className="absolute top-8 right-8 text-slate-400 hover:text-slate-900 transition-colors" title="Back to Home">
+           <div className="flex items-center">
+            <ArrowLeft className="h-6 w-6 mr-2" /> กลับหน้าแรก
+           </div>
+        </Link>
+
         {/* Mobile Logo (Visible only on small screens) */}
         <div className="absolute top-8 left-8 lg:hidden flex items-center space-x-2">
            <div className="h-8 w-8 bg-blue-600 rounded flex items-center justify-center">
