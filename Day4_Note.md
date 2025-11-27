@@ -966,7 +966,15 @@ public class ForecastController : ControllerBase
     public async Task<IActionResult> SubmitPlan([FromBody] SubmitPlanDto dto)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // ดึง ID คน login
-        if (userId == null) return Unauthorized();
+        // if (userId == null) return Unauthorized();
+        
+        // กรณี Dev/Test: ถ้าไม่ได้ Login ให้ใช้ User คนแรกใน DB แทน
+        if (userId == null)
+        {
+            var firstUser = await _context.Users.FirstOrDefaultAsync();
+            if (firstUser != null) userId = firstUser.Id;
+            else return Unauthorized("No user found in database. Please register a user first.");
+        }
 
         // เช็คว่าเคยมี Plan วันนี้ไหม เพื่อทำ Revision
         var existingRequest = await _context.ForecastRequests
@@ -1071,6 +1079,16 @@ public class ForecastController : ControllerBase
     public async Task<IActionResult> ApprovePlan([FromBody] ApprovePlanDto dto)
     {
         var adminId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        // if (adminId == null) return Unauthorized("No user found in database.");
+        
+        // กรณี Dev/Test: ถ้าไม่ได้ Login ให้ใช้ User คนแรกใน DB แทน
+        if (adminId == null)
+        {
+            var firstUser = await _context.Users.FirstOrDefaultAsync();
+            if (firstUser != null) adminId = firstUser.Id;
+            else return Unauthorized("No user found in database.");
+        }
+
         var request = await _context.ForecastRequests.FindAsync(dto.RequestID);
         if (request == null) return NotFound();
 
@@ -1115,6 +1133,16 @@ public class ForecastController : ControllerBase
     public async Task<IActionResult> ReturnPlan([FromBody] ReturnPlanDto dto)
     {
         var adminId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        // if (adminId == null) return Unauthorized("No user found in database.");
+
+        // กรณี Dev/Test: ถ้าไม่ได้ Login ให้ใช้ User คนแรกใน DB แทน
+        if (adminId == null)
+        {
+            var firstUser = await _context.Users.FirstOrDefaultAsync();
+            if (firstUser != null) adminId = firstUser.Id;
+            else return Unauthorized("No user found in database.");
+        }
+
         var request = await _context.ForecastRequests.FindAsync(dto.RequestID);
         if (request == null) return NotFound();
 
