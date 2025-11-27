@@ -100,6 +100,9 @@ app.UseAuthentication();
 // Add Authorization
 app.UseAuthorization();
 
+// Enable CORS
+app.UseCors("MultipleOrigins");
+
 app.MapControllers();
 
 app.Run();
