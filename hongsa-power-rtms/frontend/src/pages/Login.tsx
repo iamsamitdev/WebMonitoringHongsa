@@ -8,6 +8,9 @@ import { Button } from "@/components/ui/button"
 
 function Login() {
 
+  // ทดสอบอ่านไฟล์ .env
+  console.log(import.meta.env.VITE_API_URL);
+
   useEffect(() => {
     document.title = "Login | Hongsa Power RTMS";
   }, [])
