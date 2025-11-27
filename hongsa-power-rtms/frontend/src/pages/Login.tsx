@@ -1,6 +1,6 @@
-
 import { useEffect, useState } from "react"
 import { Link } from "react-router"
+import { useForm } from "react-hook-form"
 import { Eye, EyeOff, User, Lock, ArrowRight } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -12,6 +12,12 @@ function Login() {
     document.title = "Login | Hongsa Power RTMS";
   }, [])
 
+  const { register, handleSubmit, formState: { errors } } = useForm()
+
+  const onSubmit = (data: unknown) => {
+    console.log(data)
+  }
+
   const [showPassword, setShowPassword] = useState(false)
   return (
     <div className="flex flex-col space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -22,13 +28,19 @@ function Login() {
         </p>
       </div>
 
-      <div className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="space-y-2">
           <Label>ชื่อผู้ใช้งาน / อีเมล</Label>
           <div className="relative">
             <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-            <Input className="pl-10" placeholder="username หรือ email@example.com" />
+            <Input 
+              id="username"
+              {...register("username", { required: "กรุณากรอกชื่อผู้ใช้งานหรืออีเมล" })}
+              className={`pl-10 ${errors.username ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+              placeholder="username หรือ email@example.com" 
+            />
           </div>
+          {errors.username && <p className="text-red-500 text-xs">{errors.username.message as string}</p>}
         </div>
         <div className="space-y-2">
           <div className="flex items-center justify-between">
@@ -42,7 +54,9 @@ function Login() {
           <div className="relative">
             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
             <Input 
-              className="pl-10 pr-10"
+              id="password"
+              {...register("password", { required: "กรุณากรอกรหัสผ่าน" })}
+              className={`pl-10 pr-10 ${errors.password ? "border-red-500 focus-visible:ring-red-500" : ""}`}
               type={showPassword ? "text" : "password"} 
               placeholder="••••••••" 
             />
@@ -54,12 +68,13 @@ function Login() {
               {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
           </div>
+          {errors.password && <p className="text-red-500 text-xs">{errors.password.message as string}</p>}
         </div>
-        <Button className="w-full group cursor-pointer">
+        <Button type="submit" className="w-full group cursor-pointer">
           เข้าสู่ระบบ 
           <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
         </Button>
-      </div>
+      </form>
 
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
