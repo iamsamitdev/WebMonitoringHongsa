@@ -24,6 +24,7 @@ function Login() {
       console.log("Login successful:", response)
       toast.success("เข้าสู่ระบบสำเร็จ", {
         description: "ยินดีต้อนรับกลับ",
+        duration: 1000,
       })
     } catch (error) {
       console.error("Login failed:", error)
@@ -31,6 +32,7 @@ function Login() {
       const errorMessage = (error as any).response?.data?.message || "เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง"
       toast.error("เข้าสู่ระบบไม่สำเร็จ", {
         description: errorMessage,
+        duration: 1000,
       })
     }
   }

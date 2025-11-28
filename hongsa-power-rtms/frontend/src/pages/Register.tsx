@@ -1,4 +1,4 @@
-import { Link } from "react-router"
+import { Link, useNavigate } from "react-router"
 import { User, Mail, Lock, IdCard, Store } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -14,6 +14,9 @@ interface RegisterFormInputs extends RegisterData {
 }
 
 function Register() {
+
+  // สร้าง navigate function
+  const navigate = useNavigate()
 
   // ตั้ง title หน้า
   useEffect(() => {
@@ -40,6 +43,8 @@ function Register() {
       toast.success("ลงทะเบียนสำเร็จ", {
         description: "บัญชีของคุณถูกสร้างเรียบร้อยแล้ว",
       })
+      // เปลี่ยนเส้นทางไปยังหน้า login หลังจากลงทะเบียนสำเร็จ
+      navigate("/auth/login")
     } catch (error) {
       console.error("Registration failed:", error)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -5,7 +5,7 @@ function App() {
   return (
     <div className="App">
       <AppRouter />
-      <Toaster />
+      <Toaster position="top-right" />
     </div>
   )
 }
