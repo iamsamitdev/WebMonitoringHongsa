@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router'
 import { 
   LayoutDashboard, 
@@ -9,6 +10,7 @@ import {
   Zap,
   X
 } from 'lucide-react'
+import { getPendingForecasts } from '@/services/apiForecast'
 
 interface SidebarProps {
   isOpen: boolean
@@ -17,6 +19,7 @@ interface SidebarProps {
 
 const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
   const location = useLocation()
+  const [pendingCount, setPendingCount] = useState(0)
   
   // Get Role from LocalStorage
   const getUserRole = () => {
@@ -36,6 +39,24 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
 
   const userRole = getUserRole() 
 
+  useEffect(() => {
+    if (userRole === 'Admin') {
+        const fetchCount = async () => {
+            try {
+                const data = await getPendingForecasts()
+                setPendingCount(data.length)
+            } catch (error) {
+                console.error("Failed to fetch pending count", error)
+            }
+        }
+        fetchCount()
+        
+        // Poll every 30 seconds
+        const interval = setInterval(fetchCount, 30000)
+        return () => clearInterval(interval)
+    }
+  }, [userRole])
+
   // Menu Configuration
   const menuItems = [
     { 
@@ -49,7 +70,7 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
       category: "Planning & Forecast",
       items: [
         { name: 'Submit Plan', path: '/backend/planning', icon: CalendarDays },
-        { name: 'Approval', path: '/backend/approval', icon: FileCheck2, badge: '3' }, // Badge example
+        { name: 'Approval', path: '/backend/approval', icon: FileCheck2, badge: pendingCount > 0 ? pendingCount.toString() : undefined },
       ]
     },
     { 
