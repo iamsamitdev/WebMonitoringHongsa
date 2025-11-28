@@ -82,7 +82,7 @@ namespace Hongsa.Rtms.Api.Services
                 if (forecast != null && forecast.FinalLoadMW > 0)
                 {
                     decimal diff = Math.Abs(simulatedLoad - forecast.FinalLoadMW);
-                    decimal percent = (diff / forecast.FinalLoadMW) * 100;
+                    decimal percent = Math.Round((diff / forecast.FinalLoadMW) * 100, 2);
 
                     // ดึง Config Threshold
                     var thresholdConfig = await context.NotificationConfigs

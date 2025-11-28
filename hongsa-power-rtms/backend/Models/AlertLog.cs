@@ -15,4 +15,5 @@ public class AlertLog
     public decimal ActualMW { get; set; }
     public decimal ForecastMW { get; set; }
     public decimal DiffPercent { get; set; }
+    public string? Recipient { get; set; }
 }
