@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Link } from "react-router"
+import { Link, useNavigate } from "react-router"
 import { useForm } from "react-hook-form"
 import { Eye, EyeOff, User, Lock, ArrowRight } from "lucide-react"
 import { Input } from "@/components/ui/input"
@@ -15,24 +15,35 @@ function Login() {
     document.title = "Login | Hongsa Power RTMS";
   }, [])
 
+  const navigate = useNavigate()
   const { register, handleSubmit, formState: { errors } } = useForm<LoginData>()
 
   const onSubmit = async (data: LoginData) => {
     console.log(data)
     try {
-      const response = await authLogin(data)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const response: any = await authLogin(data)
       console.log("Login successful:", response)
+      
+      // Store Auth Data
+      localStorage.setItem("token", response.token)
+      localStorage.setItem("roles", JSON.stringify(response.roles))
+      localStorage.setItem("username", data.username)
+      localStorage.setItem("firstName", response.firstName)
+      localStorage.setItem("lastName", response.lastName)
+      
       toast.success("เข้าสู่ระบบสำเร็จ", {
         description: "ยินดีต้อนรับกลับ",
-        duration: 1000,
       })
+
+      // Redirect to Dashboard
+      navigate("/backend/dashboard")
     } catch (error) {
       console.error("Login failed:", error)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const errorMessage = (error as any).response?.data?.message || "เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง"
       toast.error("เข้าสู่ระบบไม่สำเร็จ", {
         description: errorMessage,
-        duration: 1000,
       })
     }
   }
