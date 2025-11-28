@@ -79,11 +79,16 @@ namespace Hongsa.Rtms.Api.Services
                                 x.EndTime > timeNow)
                     .FirstOrDefaultAsync();
 
-                if (forecast != null && forecast.FinalLoadMW > 0)
+                if (forecast != null && forecast.FinalLoadMW > 0.01m)
                 {
                     decimal diff = Math.Abs(simulatedLoad - forecast.FinalLoadMW);
-                    decimal percent = Math.Round((diff / forecast.FinalLoadMW) * 100, 2);
-
+                    decimal percent = (diff / forecast.FinalLoadMW) * 100;
+                    
+                    // ป้องกันค่าเกินขอบเขต (Overflow Protection)
+                    // สมมติว่า DB เก็บได้สูงสุด 999.99 (decimal(5,2)) หรือ 9999.99 (decimal(6,2))
+                    // เพื่อความปลอดภัย Clamp ไว้ที่ 999.99
+                    if (percent > 999.99m) percent = 999.99m;
+                    
                     // ดึง Config Threshold
                     var thresholdConfig = await context.NotificationConfigs
                         .FirstOrDefaultAsync(c => c.ConfigKey == "DiffThresholdPercent");
