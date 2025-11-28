@@ -3762,3 +3762,11 @@ namespace Hongsa.Rtms.Api.Services
     }
 }
 ```
+##### Step 24: Register ในไฟล์ Program.cs
+```csharp
+using Hongsa.Rtms.Api.Services;
+
+
+// Register Simulation Worker (Background Service)
+builder.Services.AddHostedService<SimulationWorker>();
+```
