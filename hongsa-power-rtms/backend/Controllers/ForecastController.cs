@@ -53,7 +53,7 @@ public class ForecastController : ControllerBase
 
         var request = new ForecastRequest
         {
-            TargetDate = dto.TargetDate,
+            TargetDate = dto.TargetDate.Date, // Force Date only
             RevisionNo = nextRev,
             RequestStatus = "Pending",
             SubmittedBy = userId,
@@ -63,10 +63,14 @@ public class ForecastController : ControllerBase
         // Map Items
         foreach (var item in dto.Items)
         {
+            // Handle 24:00 (End of Day) manually because TimeSpan.Parse might fail or SQL 'time' type doesn't support it
+            TimeSpan startT = (item.StartTime == "24:00") ? new TimeSpan(23, 59, 59) : TimeSpan.Parse(item.StartTime);
+            TimeSpan endT = (item.EndTime == "24:00") ? new TimeSpan(23, 59, 59) : TimeSpan.Parse(item.EndTime);
+
             request.Items.Add(new ForecastRequestItem
             {
-                StartTime = TimeSpan.Parse(item.StartTime),
-                EndTime = TimeSpan.Parse(item.EndTime),
+                StartTime = startT,
+                EndTime = endT,
                 StatusID = item.StatusID
             });
         }
@@ -149,45 +153,108 @@ public class ForecastController : ControllerBase
     public async Task<IActionResult> ApprovePlan([FromBody] ApprovePlanDto dto)
     {
         var adminId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (adminId == null) return Unauthorized("No user found in database.");
+        
+        // 1. ดึง Request ที่กำลังจะ Approve
+        var request = await _context.ForecastRequests
+            .Include(r => r.Items) // ดึง Items มาด้วยเพื่อเช็ค StatusID
+            .FirstOrDefaultAsync(r => r.RequestID == dto.RequestID);
 
-        var request = await _context.ForecastRequests.FindAsync(dto.RequestID);
-        if (request == null) return NotFound();
+        if (request == null) return NotFound("Request not found");
 
-        // Update Header
+        // ==================================================================================
+        // STEP 1: หา Max Actual Load ของวันนั้น (จาก ActualMachineLoad) และ Update DailyMaxLoadStats
+        // ==================================================================================
+        
+        // หาค่าสูงสุดจาก Log ของวันที่ TargetDate
+        var maxActualLoad = await _context.ActualMachineLoads
+            .Where(x => x.LogDateTime.Date == request.TargetDate.Date)
+            .MaxAsync(x => (decimal?)x.ActualLoadMW) ?? 0; // ถ้าไม่มีข้อมูลให้เป็น 0
+
+        // เช็คว่ามีสถิติของวันนี้หรือยัง
+        var existingStat = await _context.DailyMaxLoadStats
+            .FirstOrDefaultAsync(s => s.StatDate == request.TargetDate.Date);
+
+        if (existingStat != null)
+        {
+            // มีแล้ว -> Update
+            existingStat.MaxLoadMW = maxActualLoad;
+            existingStat.RecordedAt = DateTime.Now;
+            _context.DailyMaxLoadStats.Update(existingStat);
+        }
+        else
+        {
+            // ยังไม่มี -> Insert
+            _context.DailyMaxLoadStats.Add(new DailyMaxLoadStats
+            {
+                StatDate = request.TargetDate.Date,
+                MaxLoadMW = maxActualLoad,
+                RecordedAt = DateTime.Now
+            });
+        }
+        
+        // บันทึก Stat ลง DB ก่อนเพื่อความชัวร์
+        await _context.SaveChangesAsync(); 
+
+
+        // ==================================================================================
+        // STEP 2: Update Status ของ Request เป็น Approved
+        // ==================================================================================
         request.RequestStatus = "Approved";
         request.ReviewedBy = adminId;
         request.ReviewedDate = DateTime.Now;
 
-        // Save to ApprovedForecasts (Final Table)
-        // ลบของเก่าของวันนั้นทิ้งก่อน (ถ้ามี) เพื่อกันซ้ำซ้อน
+
+        // ==================================================================================
+        // STEP 3: สร้างข้อมูลลง ApprovedForecasts ตามเงื่อนไข StatusID
+        // ==================================================================================
+
+        // 3.1 ลบข้อมูลเก่าของวันนี้ทิ้งก่อน (กรณี Re-Approve)
         var oldApproved = _context.ApprovedForecasts.Where(a => a.TargetDate == request.TargetDate);
         _context.ApprovedForecasts.RemoveRange(oldApproved);
 
-        // วนลูปจากสิ่งที่ Admin ส่งมา (Final Value)
-        foreach (var item in dto.Items)
+        // 3.2 ดึง Config ค่า Default (สำหรับ StatusID = 0)
+        var notRunConfig = await _context.MachineStatusConfigs.FirstOrDefaultAsync(c => c.StatusID == 0);
+        decimal defaultLoad = notRunConfig?.DefaultLoadMW ?? 0.50m; // ถ้าหาไม่เจอใช้ 0.50
+
+        // 3.3 วนลูป Items เพื่อสร้าง Final Forecast
+        foreach (var item in request.Items)
         {
-            // *หมายเหตุ: ในความจริงควร join กับ request.Items เพื่อเอา StatusID มาด้วย
-            // แต่นี่เขียนแบบย่อ
-            var originalItem = await _context.ForecastRequestItems
-                    .FirstOrDefaultAsync(x => x.RequestID == dto.RequestID && 
-                                        x.StartTime == TimeSpan.Parse(item.StartTime));
+            decimal finalMW = 0;
+
+            // --- LOGIC ตามเงื่อนไข ---
+            if (item.StatusID == 1) 
+            {
+                // StatusID 1 (Run): ใช้ MaxLoad ที่หามาได้
+                finalMW = maxActualLoad;
+            }
+            else if (item.StatusID == 0)
+            {
+                // StatusID 0 (Not Run): ใช้ DefaultLoad (0.50)
+                finalMW = defaultLoad;
+            }
+            
+            // *หมายเหตุ: หาก Admin มีการแก้ไขค่าเองจากหน้าเว็บ (dto.Items) อาจต้องเช็คตรงนี้
+            // แต่ตาม Logic ที่ให้มาคือให้ Auto Calculate จาก DB
+            // ถ้าต้องการรับค่าที่ Admin แก้มาด้วย ให้ใช้: 
+            // var manualEdit = dto.Items.FirstOrDefault(x => x.StartTime == item.StartTime.ToString());
+            // if (manualEdit != null) finalMW = manualEdit.FinalLoadMW;
 
             _context.ApprovedForecasts.Add(new ApprovedForecast
             {
-                TargetDate = request.TargetDate,
-                StartTime = TimeSpan.Parse(item.StartTime),
-                EndTime = TimeSpan.Parse(item.EndTime),
-                StatusID = originalItem?.StatusID ?? 0,
-                CalculatedLoadMW = 0, // ควรเก็บค่า Original Calculated ไว้ด้วยถ้าทำได้
-                FinalLoadMW = item.FinalLoadMW,
-                IsAdminEdited = true, // Admin เป็นคนกด Approve ถือว่าผ่านตา Admin แล้ว
+                TargetDate = request.TargetDate.Date, // Force Date only
+                StartTime = item.StartTime,
+                EndTime = item.EndTime,
+                StatusID = item.StatusID,
+                CalculatedLoadMW = finalMW, // ค่าที่ระบบคำนวณได้
+                FinalLoadMW = finalMW,      // ค่าสุดท้ายที่จะใช้จริง
+                IsAdminEdited = false,      // เป็น Auto logic
                 SourceRequestID = request.RequestID
             });
         }
 
         await _context.SaveChangesAsync();
-        return Ok(new { Message = "Plan Approved" });
+
+        return Ok(new { Message = "Plan Approved and Forecast Generated", MaxLoadUsed = maxActualLoad });
     }
 
     // 6. POST Return (Admin)

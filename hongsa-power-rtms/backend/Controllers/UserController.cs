@@ -1,112 +1,162 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 using Hongsa.Rtms.Api.Models;
+using Hongsa.Rtms.Api.DTOs;
 
 namespace Hongsa.Rtms.Api.Controllers;
 
+[Route("api/[controller]")]
 [ApiController]
-[Route("api/[controller]")] // api/User
+[Authorize(Roles = "Admin")] // เปิดบรรทัดนี้ถ้าต้องการให้เฉพาะ Admin ใช้ได้
 public class UserController : ControllerBase
 {
-    // mock data for users
-    private static readonly List<User> _users = new List<User>
-    {
-        new User { 
-            Id = 1, 
-            Username = "john", 
-            Email = "john@email.com", 
-            Fullname = "John Doe"
-        },
-        new User { 
-            Id = 2, 
-            Username = "samit", 
-            Email = "samit@email.com", 
-            Fullname = "Samit Koyom"
-        },
-    };
+    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly RoleManager<IdentityRole> _roleManager;
 
-    // GET: api/User
+    public UserController(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
+    {
+        _userManager = userManager;
+        _roleManager = roleManager;
+    }
+
+    // 1. GET: api/User (ดึงทั้งหมด)
     [HttpGet]
-    public ActionResult<IEnumerable<User>> GetUsers()
+    public async Task<IActionResult> GetAllUsers()
     {
-        // IEnumerable คืออะไร
-        // IEnumerable เป็น interface ใน .NET Framework ที่ใช้แทน collection ของ object
-        // interface นี้กำหนด method เพียงตัวเดียวคือ GetEnumerator()
-        // GetEnumerator() : method นี้ return enumerator
-        // enumerator : object ที่ใช้วนซ้ำผ่าน collection
-        // ในที่นี้เราใช้ IEnumerable ในการ return ข้อมูลของ users
+        var users = await _userManager.Users.ToListAsync();
+        var userDtos = new List<UserDto>();
 
-        // วนซ้ำผ่าน collection โดยใช้ foreach
-        // foreach (var user in _users)
-        // {
-        //     Console.WriteLine($"{user.Id} - {user.Username}");
-        // }
+        foreach (var user in users)
+        {
+            var roles = await _userManager.GetRolesAsync(user);
+            userDtos.Add(new UserDto
+            {
+                Id = user.Id,
+                Username = user.UserName,
+                Email = user.Email,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                EmployeeId = user.EmployeeId,
+                DepartmentName = user.DepartmentName,
+                Role = roles.FirstOrDefault() ?? UserRolesModel.User,
+                Status = "Active" // Mock ไว้ก่อน หรือดึงจาก user.IsActive ถ้ามี
+            });
+        }
 
-        return Ok(_users);
+        return Ok(userDtos);
     }
 
-    // GET: api/User/{id}
+    // 2. GET: api/User/{id} (ดึงรายคน)
     [HttpGet("{id}")]
-    public ActionResult<User> GetUser(int id)
+    public async Task<IActionResult> GetUserById(string id)
     {
-        var user = _users.Find(u => u.Id == id); // find user by id
-        if (user == null)
+        var user = await _userManager.FindByIdAsync(id);
+        if (user == null) return NotFound();
+
+        var roles = await _userManager.GetRolesAsync(user);
+        
+        return Ok(new UserDto
         {
-            return NotFound();
-        }
-        return Ok(user);
+            Id = user.Id,
+            Username = user.UserName,
+            Email = user.Email,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            EmployeeId = user.EmployeeId,
+            DepartmentName = user.DepartmentName,
+            Role = roles.FirstOrDefault() ?? UserRolesModel.User,
+            Status = "Active"
+        });
     }
 
-
-    // POST: api/User
+    // 3. POST: api/User (สร้างใหม่)
     [HttpPost]
-    public ActionResult<User> CreateUser([FromBody] User user)
+    public async Task<IActionResult> CreateUser([FromBody] CreateUserDto model)
     {
-        _users.Add(user);
-        return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
+        if (await _userManager.FindByEmailAsync(model.Email) != null)
+            return BadRequest("Email already exists!");
+
+        if (await _userManager.FindByNameAsync(model.Username) != null)
+            return BadRequest("Username already exists!");
+
+        var user = new ApplicationUser
+        {
+            UserName = model.Username,
+            Email = model.Email,
+            FirstName = model.FirstName,
+            LastName = model.LastName,
+            EmployeeId = model.EmployeeId,
+            DepartmentName = model.DepartmentName,
+            SecurityStamp = Guid.NewGuid().ToString()
+        };
+
+        var result = await _userManager.CreateAsync(user, model.Password);
+
+        if (!result.Succeeded)
+            return BadRequest(result.Errors);
+
+        // Assign Role
+        if (!await _roleManager.RoleExistsAsync(model.Role))
+        {
+            await _roleManager.CreateAsync(new IdentityRole(model.Role));
+        }
+        await _userManager.AddToRoleAsync(user, model.Role);
+
+        return Ok(new { Message = "User created successfully!" });
     }
 
-    // PUT: api/User/{id}
+    // 4. PUT: api/User/{id} (แก้ไข)
     [HttpPut("{id}")]
-    public IActionResult UpdateUser(int id, [FromBody] User user)
+    public async Task<IActionResult> UpdateUser(string id, [FromBody] UpdateUserDto model)
     {
-        // Validate user id
-        if (id != user.Id)
+        var user = await _userManager.FindByIdAsync(id);
+        if (user == null) return NotFound();
+
+        // Update basic info
+        user.FirstName = model.FirstName;
+        user.LastName = model.LastName;
+        user.EmployeeId = model.EmployeeId;
+        user.DepartmentName = model.DepartmentName;
+        
+        // Update Role (ถ้าเปลี่ยน)
+        var currentRoles = await _userManager.GetRolesAsync(user);
+        var currentRole = currentRoles.FirstOrDefault();
+
+        if (currentRole != model.Role)
         {
-            return BadRequest();
+            // ลบ Role เก่า
+            if (currentRole != null)
+                await _userManager.RemoveFromRoleAsync(user, currentRole);
+            
+            // ใส่ Role ใหม่
+            if (!await _roleManager.RoleExistsAsync(model.Role))
+                await _roleManager.CreateAsync(new IdentityRole(model.Role));
+            
+            await _userManager.AddToRoleAsync(user, model.Role);
         }
 
-        // Find existing user
-        var existingUser = _users.Find(u => u.Id == id);
-        if (existingUser == null)
-        {
-            return NotFound();
-        }
+        var result = await _userManager.UpdateAsync(user);
 
-        // Update user
-        existingUser.Username = user.Username;
-        existingUser.Email = user.Email;
-        existingUser.Fullname = user.Fullname;
+        if (!result.Succeeded)
+            return BadRequest(result.Errors);
 
-        // Return updated user
-        return Ok(existingUser);
+        return Ok(new { Message = "User updated successfully!" });
     }
 
-    // DELETE: api/User/2
+    // 5. DELETE: api/User/{id} (ลบ)
     [HttpDelete("{id}")]
-    public ActionResult DeleteUser(int id)
+    public async Task<IActionResult> DeleteUser(string id)
     {
-        // Find existing user
-        var user = _users.Find(u => u.Id == id);
+        var user = await _userManager.FindByIdAsync(id);
+        if (user == null) return NotFound();
 
-        if (user == null)
-        {
-            return NotFound();
-        }
+        var result = await _userManager.DeleteAsync(user);
 
-        // Remove user from list
-        _users.Remove(user);
-        return NoContent();
+        if (!result.Succeeded)
+            return BadRequest(result.Errors);
+
+        return Ok(new { Message = "User deleted successfully!" });
     }
-
-
 }

@@ -30,8 +30,9 @@ namespace Hongsa.Rtms.Api.Controllers
             decimal actualVal = actual?.ActualLoadMW ?? 0;
 
             // 2. Get Forecast Load for current time
+            // ใช้ .Date เพื่อความชัวร์ในการเปรียบเทียบวันที่
             var forecast = await _context.ApprovedForecasts
-                .Where(x => x.TargetDate == now.Date && 
+                .Where(x => x.TargetDate.Date == now.Date && 
                             x.StartTime <= timeNow && 
                             x.EndTime > timeNow)
                 .FirstOrDefaultAsync();
@@ -42,15 +43,18 @@ namespace Hongsa.Rtms.Api.Controllers
             decimal diffPercent = 0;
             if (forecastVal != 0)
             {
-                diffPercent = Math.Abs((actualVal - forecastVal) / forecastVal) * 100;
+                // สูตรเดิม (Absolute Percentage Error):
+                // diffPercent = Math.Abs((actualVal - forecastVal) / forecastVal) * 100;
+                // สูตรใหม่ (Signed Percentage Error):
+                diffPercent = (actualVal - forecastVal) / forecastVal * 100;
             }
 
             return Ok(new 
             { 
-                ActualMW = actualVal, 
-                ForecastMW = forecastVal, 
-                DiffPercent = Math.Round(diffPercent, 2),
-                LastUpdate = actual?.LogDateTime
+                actualMW = actualVal,       // แก้เป็นตัวเล็ก
+                forecastMW = forecastVal,   // แก้เป็นตัวเล็ก
+                diffPercent = Math.Round(diffPercent, 2),
+                lastUpdate = actual?.LogDateTime
             });
         }
 
@@ -71,14 +75,24 @@ namespace Hongsa.Rtms.Api.Controllers
                 .ToListAsync();
 
             // จัดรูปแบบข้อมูลสำหรับกราฟ (ขึ้นอยู่กับ Library หน้าบ้าน)
-            // สร้างแกนเวลา 00:00 - 23:59
-            var chartPoints = new List<object>();
+            // Expand Forecast Ranges to Hourly Points (00:00 - 23:00)
+            var expandedForecasts = new List<object>();
+            for (int h = 0; h < 24; h++)
+            {
+                var timePoint = new TimeSpan(h, 0, 0);
+                // Find forecast that covers this hour
+                var match = forecasts.FirstOrDefault(f => f.StartTime <= timePoint && f.EndTime > timePoint);
+                if (match != null)
+                {
+                    expandedForecasts.Add(new { time = timePoint, mw = match.FinalLoadMW });
+                }
+            }
 
             // *Simplification: ส่ง Raw Data ให้ Front-end ไป map เอง หรือทำ logic mapping ที่นี่*
             // ส่งไป 2 arrays ให้ง่ายต่อการ plot
             return Ok(new { 
-                Forecasts = forecasts.Select(f => new { Time = f.StartTime, MW = f.FinalLoadMW }),
-                Actuals = actuals.Select(a => new { Time = a.LogDateTime, MW = a.ActualLoadMW })
+                forecasts = expandedForecasts, 
+                actuals = actuals.Select(a => new { time = a.LogDateTime, mw = a.ActualLoadMW })   // แก้เป็นตัวเล็ก
             });
         }
     }

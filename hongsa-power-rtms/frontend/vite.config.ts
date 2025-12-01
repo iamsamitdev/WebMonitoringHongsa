@@ -11,4 +11,12 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    rollupOptions: {
+      // Tree shaking is enabled by default in Vite, but you can configure it here
+      treeshake: {
+        preset: 'recommended',
+      },
+    },
+  },
 })

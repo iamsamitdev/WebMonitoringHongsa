@@ -45,7 +45,7 @@ namespace Hongsa.Rtms.Api.Controllers
             if (forecast != null)
             {
                 decimal diff = Math.Abs(input.ActualLoadMW - forecast.FinalLoadMW);
-                decimal percent = (forecast.FinalLoadMW == 0) ? 0 : (diff / forecast.FinalLoadMW) * 100;
+                decimal percent = (forecast.FinalLoadMW == 0) ? 0 : diff / forecast.FinalLoadMW * 100;
 
                 // ดึง Config Threshold (30%)
                 var thresholdConfig = await _context.NotificationConfigs
